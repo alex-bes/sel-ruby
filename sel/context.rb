@@ -11,7 +11,7 @@ class Context
     end
 
     def registerValue name, value
-	   @handlers[name] = value #TODO: wrap value into function 
+        @handlers[name] = lambda {|arg| value}
     end
 
     def unregisterHandler name

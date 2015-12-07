@@ -1,5 +1,7 @@
-require "./context"
-require "./parser"
+require "./sel/context"
+require "./sel/parser"
+
+
 
 class Evaluator
 
@@ -11,7 +13,7 @@ class Evaluator
     end
 
     def evaluate expression, context = Context.new
-        if context.responds_to? 'incherit' 
+        if context.respond_to? 'incherit' 
             context.incherit @globalContext
         else
             context = @globalContext
@@ -19,33 +21,35 @@ class Evaluator
         _evaluate expression, context, 0
     end
 
-    protected
+    
     def _evaluate  expression, context, r_level
         if not expression.is_a? String
             return espression
         end
 
-        if r_level < RECURSION_LIMIT
+        if r_level > RECURSION_LIMIT
             raise "SEL: Recursion limit reached" 
         end
-
-        occurrence = @parser.parse_occurrence expression
-        while occurrence
-            argument
-            if occurrence.is_func
-                argument = _evaluate context, rLevel + 1
+        
+        occurence = @parser.parse_occurence expression
+        while occurence
+            argument = nil
+            if occurence.is_func
+                argument = _evaluate occurence.argument, context, r_level + 1
             end         
 
-            handler = @context.getHandlerByName occurrence.name
-            sub_value = handler argument
-            if (not expression.is_a? String) 
-                or (expression.length == occurrence.full_match.length)
+            handler = context.getHandlerByName occurence.name
+            sub_value = handler.call argument
+            if ((not expression.is_a? String) or (expression.length == occurence.full_match.length))
                 expression = sub_value
                 break
             else
-                expression = expression.sub occurrence.full_match sub_value
-                occurrence = @parser.parse_occurrence expression              
+                expression = expression.sub occurence.full_match, sub_value
+                occurence = @parser.parse_occurence expression    
+            end          
         end
+
+        
         expression
     end
 end

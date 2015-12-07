@@ -1,13 +1,13 @@
 require './sel/context'
+require './sel/evaluator'
 
 context = Context.new
+evaluator = Evaluator.new
 
-context.registerHandler('foo', 'bar')
+context.registerValue "name", "RUBY"
 
-puts context.handlers
+context.registerHandler "capitalize", lambda {|arg| arg.capitalize}
 
-context2 = Context.new
+puts evaluator.evaluate "Hello $capitalize($name)", context
 
-context2.incherit context
 
-puts context2.handlers
